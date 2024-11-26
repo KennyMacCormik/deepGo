@@ -137,7 +137,19 @@ func (m *OrderedMap) Size() int {
 }
 
 func (m *OrderedMap) ForEach(action func(int, int)) {
-	// need to implement
+	if m == nil || m.key == nil {
+		return
+	}
+	//left
+	if m.left != nil {
+		m.left.ForEach(action)
+	}
+	//self
+	action(*m.key, *m.val)
+	//right
+	if m.right != nil {
+		m.right.ForEach(action)
+	}
 }
 
 func TestCircularQueue(t *testing.T) {
