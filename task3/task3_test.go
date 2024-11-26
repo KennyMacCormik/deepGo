@@ -51,7 +51,7 @@ func (b *COWBuffer) Update(index int, value byte) bool {
 }
 
 func (b *COWBuffer) String() string {
-	return *(*string)(unsafe.Pointer(&b.data))
+	return unsafe.String(unsafe.SliceData(b.data), len(b.data))
 }
 
 func TestCOWBuffer(t *testing.T) {
