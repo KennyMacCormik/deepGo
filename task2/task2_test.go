@@ -7,40 +7,44 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// go test -v homework_test.go
-
 type CircularQueue struct {
-	values      []int
-	left, right int
-	// need to implement
+	values          []int
+	begin, end, num int
+}
+
+func (q *CircularQueue) next(i *int) {
+	if *i+1 >= cap(q.values) {
+		*i = 0
+	} else {
+		*i++
+	}
 }
 
 func NewCircularQueue(size int) CircularQueue {
-	return CircularQueue{make([]int, 0, size), 0, 0}
+	return CircularQueue{make([]int, size), 0, 0, 0}
 }
 
 func (q *CircularQueue) Push(value int) bool {
-	if q.right-q.left == cap(q.values) {
-		return false
-	}
-
-	if q.left != 0 {
-		q.values[q.left-1] = value
-		q.left--
+	if q.Empty() {
+		q.values[q.begin] = value
+		q.num++
 		return true
 	}
-
-	q.values = append(q.values, value)
-	q.right++
-	return true
+	if q.num+1 <= cap(q.values) {
+		q.next(&q.end)
+		q.num++
+		q.values[q.end] = value
+		return true
+	}
+	return false
 }
 
 func (q *CircularQueue) Pop() bool {
-	if q.values == nil || q.left == q.right {
+	if q.Empty() {
 		return false
 	}
-
-	q.left++
+	q.next(&q.begin)
+	q.num--
 	return true
 }
 
@@ -48,22 +52,22 @@ func (q *CircularQueue) Front() int {
 	if q.Empty() {
 		return -1
 	}
-	return q.values[q.left]
+	return q.values[q.begin]
 }
 
 func (q *CircularQueue) Back() int {
 	if q.Empty() {
 		return -1
 	}
-	return q.values[q.right-1]
+	return q.values[q.end]
 }
 
 func (q *CircularQueue) Empty() bool {
-	return q.left == q.right
+	return q.num == 0
 }
 
 func (q *CircularQueue) Full() bool {
-	return len(q.values) != 0 && q.right == cap(q.values) && q.left == 0
+	return q.num == cap(q.values)
 }
 
 func TestCircularQueue(t *testing.T) {
@@ -97,8 +101,8 @@ func TestCircularQueue(t *testing.T) {
 
 	assert.True(t, reflect.DeepEqual([]int{4, 2, 3}, queue.values))
 
-	assert.Equal(t, 4, queue.Front())
-	assert.Equal(t, 3, queue.Back())
+	assert.Equal(t, 2, queue.Front())
+	assert.Equal(t, 4, queue.Back())
 
 	assert.True(t, queue.Pop())
 	assert.True(t, queue.Pop())
